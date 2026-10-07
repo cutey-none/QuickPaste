@@ -76,14 +76,6 @@ struct PanelView: View {
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            Text(item.date, style: .relative)
-                .font(.caption)
-                .foregroundStyle(selected ? .white.opacity(0.8) : .secondary)
-            if index < 9 {
-                Text("⌘\(index + 1)")
-                    .font(.caption.monospaced())
-                    .foregroundStyle(selected ? .white.opacity(0.8) : .secondary)
-            }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 7)
