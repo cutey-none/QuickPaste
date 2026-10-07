@@ -37,13 +37,20 @@ public struct ClipItem: Codable, Equatable, Identifiable {
 public final class HistoryStore: ObservableObject {
     @Published public private(set) var items: [ClipItem] = []
 
-    public let limit: Int
+    /// 最多保留的条数，调小时立即删除超出的条目及其图片文件。
+    public var limit: Int {
+        didSet {
+            guard limit != oldValue else { return }
+            trimToLimit()
+            save()
+        }
+    }
     public let imageDirectory: URL
     private let fileURL: URL?
 
     /// `fileURL` 为 nil 时历史只保存在内存中，图片写到临时目录。
     /// 图片默认保存在 `fileURL` 同级的 images 目录。
-    public init(fileURL: URL?, imageDirectory: URL? = nil, limit: Int = 200) {
+    public init(fileURL: URL?, imageDirectory: URL? = nil, limit: Int = 30) {
         self.fileURL = fileURL
         self.limit = limit
         self.imageDirectory = imageDirectory
@@ -107,11 +114,14 @@ public final class HistoryStore: ObservableObject {
 
     private func insert(_ item: ClipItem) {
         items.insert(item, at: 0)
-        if items.count > limit {
-            items[limit...].forEach(deleteImageFile)
-            items.removeLast(items.count - limit)
-        }
+        trimToLimit()
         save()
+    }
+
+    private func trimToLimit() {
+        guard items.count > limit else { return }
+        items[limit...].forEach(deleteImageFile)
+        items.removeLast(items.count - limit)
     }
 
     private func deleteImageFile(of item: ClipItem) {
@@ -124,10 +134,12 @@ public final class HistoryStore: ObservableObject {
               let decoded = try? JSONDecoder().decode([ClipItem].self, from: data)
         else { return }
         // 丢掉图片文件已不存在的条目。
-        items = Array(decoded.filter { item in
+        items = decoded.filter { item in
             imageURL(for: item).map { FileManager.default.fileExists(atPath: $0.path) } ?? true
-        }.prefix(limit))
+        }
+        trimToLimit()
         removeOrphanImages()
+        if items.count != decoded.count { save() }
     }
 
     /// 删除图片目录中不再被任何条目引用的文件。

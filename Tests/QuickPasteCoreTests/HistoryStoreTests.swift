@@ -44,6 +44,30 @@ final class HistoryStoreTests: XCTestCase {
         XCTAssertEqual(store.items.map(\.text), ["4", "3", "2"])
     }
 
+    func testDefaultLimitIs30() {
+        let store = HistoryStore(fileURL: nil)
+        (1...31).map(String.init).forEach(store.add)
+        XCTAssertEqual(store.limit, 30)
+        XCTAssertEqual(store.items.count, 30)
+        XCTAssertEqual(store.items.last?.text, "2")
+    }
+
+    func testLoweringLimitDropsOldestAndPersists() {
+        let store = HistoryStore(fileURL: tempURL, limit: 5)
+        ["1", "2", "3", "4"].forEach(store.add)
+        store.limit = 2
+        XCTAssertEqual(store.items.map(\.text), ["4", "3"])
+        XCTAssertEqual(HistoryStore(fileURL: tempURL).items.map(\.text), ["4", "3"])
+    }
+
+    func testLoadingWithSmallerLimitRewritesFile() throws {
+        let store = HistoryStore(fileURL: tempURL)
+        ["1", "2", "3"].forEach(store.add)
+        _ = HistoryStore(fileURL: tempURL, limit: 1)
+        let saved = try JSONDecoder().decode([ClipItem].self, from: Data(contentsOf: tempURL))
+        XCTAssertEqual(saved.map(\.text), ["3"])
+    }
+
     func testRemoveAndClear() {
         let store = HistoryStore(fileURL: nil)
         store.add("a")
@@ -147,6 +171,15 @@ final class HistoryStoreImageTests: XCTestCase {
         small.addImage(png: Data("a".utf8), width: 1, height: 1)
         let url = try XCTUnwrap(small.imageURL(for: small.items[0]))
         small.add("b")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
+    }
+
+    func testLoweringLimitDeletesDroppedImageFiles() throws {
+        store.addImage(png: Data("a".utf8), width: 1, height: 1)
+        let url = try XCTUnwrap(store.imageURL(for: store.items[0]))
+        store.add("b")
+        store.limit = 1
+        XCTAssertEqual(store.items.map(\.text), ["b"])
         XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
     }
 
