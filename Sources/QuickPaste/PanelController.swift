@@ -21,7 +21,7 @@ final class PanelController: NSObject, NSWindowDelegate {
         super.init()
 
         panel = KeyablePanel(
-            contentRect: NSRect(x: 0, y: 0, width: 640, height: 420),
+            contentRect: NSRect(x: 0, y: 0, width: 800, height: 460),
             styleMask: [.titled, .fullSizeContentView],
             backing: .buffered, defer: true)
         panel.titleVisibility = .hidden
