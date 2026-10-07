@@ -67,7 +67,11 @@ final class PanelController: NSObject, NSWindowDelegate {
     private var results: [ClipItem] { store.search(model.query) }
 
     private func select(_ item: ClipItem) {
-        Paster.copy(item.text)
+        if let url = store.imageURL(for: item) {
+            guard Paster.copyImage(at: url) else { return }
+        } else {
+            Paster.copy(item.text)
+        }
         hide()
         previousApp?.activate()
 

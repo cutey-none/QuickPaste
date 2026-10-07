@@ -1,7 +1,7 @@
 import AppKit
 import Carbon
 
-/// 把文本写回剪贴板，并在有辅助功能权限时模拟 ⌘V 粘贴到前台应用。
+/// 把文本或图片写回剪贴板，并在有辅助功能权限时模拟 ⌘V 粘贴到前台应用。
 enum Paster {
     static var isTrusted: Bool { AXIsProcessTrusted() }
 
@@ -15,6 +15,18 @@ enum Paster {
         let pb = NSPasteboard.general
         pb.clearContents()
         pb.setString(text, forType: .string)
+    }
+
+    /// 同时写入 PNG 和 TIFF，兼容只认其中一种的应用。读取失败时返回 false。
+    static func copyImage(at url: URL) -> Bool {
+        guard let png = try? Data(contentsOf: url) else { return false }
+        let pb = NSPasteboard.general
+        pb.clearContents()
+        pb.setData(png, forType: .png)
+        if let tiff = NSBitmapImageRep(data: png)?.tiffRepresentation {
+            pb.setData(tiff, forType: .tiff)
+        }
+        return true
     }
 
     static func pasteToFrontApp() {
