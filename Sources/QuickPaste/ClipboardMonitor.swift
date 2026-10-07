@@ -1,6 +1,6 @@
 import AppKit
 
-/// 轮询系统剪贴板，发现新的纯文本时回调。
+/// 轮询系统剪贴板，发现新的纯文本或图片时回调。文本优先，没有文本时才取图片。
 final class ClipboardMonitor {
     /// 密码管理器等应用用这些类型标记不应被记录的内容（见 nspasteboard.org）。
     private static let ignoredTypes: Set<NSPasteboard.PasteboardType> = [
@@ -13,9 +13,14 @@ final class ClipboardMonitor {
     private var lastChangeCount: Int
     private var timer: Timer?
     private let onNewText: (String) -> Void
+    private let onNewImage: (_ png: Data, _ width: Int, _ height: Int) -> Void
 
-    init(onNewText: @escaping (String) -> Void) {
+    init(
+        onNewText: @escaping (String) -> Void,
+        onNewImage: @escaping (_ png: Data, _ width: Int, _ height: Int) -> Void
+    ) {
         self.onNewText = onNewText
+        self.onNewImage = onNewImage
         lastChangeCount = pasteboard.changeCount
     }
 
@@ -30,9 +35,23 @@ final class ClipboardMonitor {
         lastChangeCount = pasteboard.changeCount
 
         let types = Set(pasteboard.types ?? [])
-        guard types.isDisjoint(with: Self.ignoredTypes),
-              let text = pasteboard.string(forType: .string)
-        else { return }
-        onNewText(text)
+        guard types.isDisjoint(with: Self.ignoredTypes) else { return }
+        if let text = pasteboard.string(forType: .string) {
+            onNewText(text)
+        } else if let image = readImage() {
+            onNewImage(image.png, image.width, image.height)
+        }
+    }
+
+    /// 读取 PNG，没有时把 TIFF 转成 PNG。
+    private func readImage() -> (png: Data, width: Int, height: Int)? {
+        if let png = pasteboard.data(forType: .png), let rep = NSBitmapImageRep(data: png) {
+            return (png, rep.pixelsWide, rep.pixelsHigh)
+        }
+        guard let tiff = pasteboard.data(forType: .tiff),
+              let rep = NSBitmapImageRep(data: tiff),
+              let png = rep.representation(using: .png, properties: [:])
+        else { return nil }
+        return (png, rep.pixelsWide, rep.pixelsHigh)
     }
 }

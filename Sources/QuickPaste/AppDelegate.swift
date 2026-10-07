@@ -15,7 +15,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         store = HistoryStore(fileURL: Self.historyURL)
         panel = PanelController(store: store)
-        monitor = ClipboardMonitor { [weak self] text in self?.store.add(text) }
+        monitor = ClipboardMonitor(
+            onNewText: { [weak self] text in self?.store.add(text) },
+            onNewImage: { [weak self] png, width, height in
+                self?.store.addImage(png: png, width: width, height: height)
+            })
         monitor.start()
 
         hotKey = HotKey(keyCode: kVK_ANSI_V, modifiers: cmdKey | shiftKey) { [weak self] in
