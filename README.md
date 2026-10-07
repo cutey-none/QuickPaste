@@ -27,18 +27,35 @@ QuickPaste 是一个轻量的 macOS 菜单栏剪贴板历史工具：按 **⌘�
 
 ## 构建与运行
 
-需要 macOS 13+ 和 Xcode（或 Swift 5.9+ 工具链）。
+环境要求：
+
+- macOS 13+（Apple 芯片或 Intel 均可，按本机架构编译）
+- Swift 5.9+：安装 Xcode，或只装命令行工具 `xcode-select --install`（只构建不跑测试时够用）
 
 ```bash
+git clone https://github.com/cutey-none/QuickPaste.git
+cd QuickPaste
 ./scripts/build-app.sh      # 生成 build/QuickPaste.app
 open build/QuickPaste.app
 ```
 
-可以把 `build/QuickPaste.app` 拖到 `/Applications` 后再在菜单栏里开启“开机启动”。
+启动后没有窗口也不出现在 Dock，图标在屏幕右上角的菜单栏中；按 ⌘⇧V 呼出面板。
 
-运行测试：
+建议把 `build/QuickPaste.app` 拖到 `/Applications`，从那里打开，再在菜单栏里开启“开机启动”。
+
+更新到最新代码：
 
 ```bash
+git pull
+./scripts/build-app.sh
+```
+
+然后退出旧的 QuickPaste（菜单栏 → 退出），重新拷贝并打开。
+
+运行测试（需要完整的 Xcode，仅装命令行工具会报 `no such module 'XCTest'`）：
+
+```bash
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer   # 若之前指向了命令行工具
 swift test
 ```
 
