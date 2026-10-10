@@ -16,6 +16,7 @@ struct PanelView: View {
     let onSelect: (ClipItem) -> Void
 
     @FocusState private var searchFocused: Bool
+    @AppStorage("darkAppearance") private var darkAppearance = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var hoveredItem: UUID?
 
@@ -38,9 +39,12 @@ struct PanelView: View {
         }
         .padding(20)
         .frame(width: Self.size.width, height: Self.size.height)
-        .glassSurface(cornerRadius: 28)
+        .glassSurface(cornerRadius: 28,
+                      tint: darkAppearance ? .black.opacity(0.28) : .white.opacity(0.65))
         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .preferredColorScheme(darkAppearance ? .dark : .light)
         .onAppear { searchFocused = true }
+        .onChange(of: darkAppearance) { _ in searchFocused = true }
     }
 
     private var header: some View {
@@ -53,6 +57,15 @@ struct PanelView: View {
             Text("QuickPaste").font(.system(size: 18, weight: .semibold, design: .rounded))
             Text("剪贴板历史").font(.callout).foregroundStyle(.secondary)
             Spacer()
+            Toggle(isOn: $darkAppearance) {
+                Label("深色", systemImage: "moon.fill")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+            }
+            .toggleStyle(.switch)
+            .controlSize(.small)
+            .help("关闭为亮色，开启为暗色；自动记住你的选择")
+            .accessibilityLabel("深色外观")
             keycap("⌘⇧V")
         }
     }
