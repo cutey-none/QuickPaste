@@ -21,11 +21,14 @@ final class PanelController: NSObject, NSWindowDelegate {
         super.init()
 
         panel = KeyablePanel(
-            contentRect: NSRect(x: 0, y: 0, width: 800, height: 460),
-            styleMask: [.titled, .fullSizeContentView],
+            contentRect: NSRect(origin: .zero, size: PanelView.size),
+            styleMask: [.borderless],
             backing: .buffered, defer: true)
         panel.titleVisibility = .hidden
         panel.titlebarAppearsTransparent = true
+        panel.isOpaque = false
+        panel.backgroundColor = .clear
+        panel.hasShadow = true
         panel.isMovableByWindowBackground = true
         panel.level = .floating
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
