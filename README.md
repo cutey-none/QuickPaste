@@ -32,6 +32,10 @@ QuickPaste 是一个轻量的 macOS 菜单栏剪贴板历史工具：按 **⌘�
 
 ## 安装
 
+无需自行编译：从 [GitHub Releases](https://github.com/cutey-none/QuickPaste/releases/latest) 下载 DMG 与对应的 `.sha256` 校验文件。
+
+当前 **v0.0.1** 提供 [Apple 芯片版 DMG](https://github.com/cutey-none/QuickPaste/releases/download/v0.0.1/QuickPaste_0.0.1_arm64.dmg) 和 [SHA-256 校验文件](https://github.com/cutey-none/QuickPaste/releases/download/v0.0.1/QuickPaste_0.0.1_arm64.dmg.sha256)。Intel Mac 暂需按下文从源码构建。
+
 支持 **macOS 13+**。DMG 文件名中的 `arm64` 对应 Apple 芯片，`x86_64` 对应 Intel；本地构建默认生成当前 Mac 架构的安装包。
 
 1. 双击 `QuickPaste_<版本>_<架构>.dmg`。
@@ -82,13 +86,13 @@ cd QuickPaste
 open build                 # 打开输出目录
 ```
 
-输出示例（0.1.0，Apple 芯片）：
+输出示例（0.0.1，Apple 芯片）：
 
 ```text
 build/
   QuickPaste.app
-  QuickPaste_0.1.0_arm64.dmg
-  QuickPaste_0.1.0_arm64.dmg.sha256
+  QuickPaste_0.0.1_arm64.dmg
+  QuickPaste_0.0.1_arm64.dmg.sha256
 ```
 
 只构建应用并直接运行：
@@ -116,7 +120,7 @@ for script in scripts/*.sh; do bash -n "$script"; done
 swift test
 ./scripts/build-dmg.sh
 codesign --verify --strict --verbose=2 build/QuickPaste.app
-hdiutil verify build/QuickPaste_0.1.0_arm64.dmg  # Intel 使用 x86_64 文件名
+hdiutil verify build/QuickPaste_0.0.1_arm64.dmg  # Intel 使用 x86_64 文件名
 ```
 
 若测试报 `no such module 'XCTest'`，安装完整 Xcode，并在必要时切换开发者目录：
