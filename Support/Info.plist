@@ -10,6 +10,10 @@
 	<string>QuickPaste</string>
 	<key>CFBundleExecutable</key>
 	<string>QuickPaste</string>
+	<key>CFBundleIconFile</key>
+	<string>QuickPaste.icns</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.productivity</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
